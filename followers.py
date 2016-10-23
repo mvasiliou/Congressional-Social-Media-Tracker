@@ -49,18 +49,6 @@ def start_twitter_followers():
         gov_following, gov_followers, gov_statuses,gov_favorites = get_follow_counts(api,gov_twitter, cand_id, error_list)
         write_row = [cand_id, date, camp_followers, camp_following, camp_statuses,camp_favorites, gov_followers, gov_following,gov_statuses, gov_favorites]
         follow_writer.writerow(write_row)
-        break
-
-    error_message = "Good morning Mike,<br><br>"
-    if len(error_list) == 0:
-        error_message+="Congrats! There were no errors today!"
-    else:
-        error_message += "Here are today's errors: <br><br>"
-        for item in error_list:
-            error_message += str(item[0]) + ',' + str(item[1]) + ',' + str(item[2]) + '<br>'
-    now = datetime.datetime.now()    
-    helper.send_message('mvasiliou94@gmail.com', 'Successfully scraped followers at: '+str(date), error_message, [("attachment", open(file_name))])
-    print('Done')
 
 if __name__ == "__main__":
     start_twitter_followers()

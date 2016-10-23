@@ -88,15 +88,6 @@ def start_scrape_tweets():
 
         camp_tweets = get_tweets(api, camp_twitter, cand_id, camp_tweets_writer,start_date, end_date,error_list)
         gov_tweets = get_tweets(api, gov_twitter, cand_id, gov_tweets_writer,start_date,end_date, error_list)
-        break
-
-    message = 'Hello Mike, <br><br>'
-    if len(error_list) == 0:
-        message += "No errors! Have a great day!"
-    else:
-        for error in error_list:
-            message += error + '<br><br>'
-    helper.send_message('mvasiliou94@gmail.com', 'Completed scraping tweets for ' + str(today),message, [("attachment", open(camp_file_name)),("attachment", open(gov_file_name))])
 
 if __name__ == '__main__':
     start_scrape_tweets()

@@ -2,17 +2,6 @@ import requests
 import facebook
 import tweepy
 
-def send_message(receiver, subject, message, files = []):
-    mailgun_key = get_token('Tokens/mailgun_key.txt')
-    return requests.post(
-        "https://api.mailgun.net/v3/mikevasiliou.com/messages",
-        auth=("api", mailgun_key),
-        files = files,
-        data={"from": "War Room Bot <warroom@mikevasiliou.com>",
-              "to": [receiver],
-              "subject": subject,
-              "html": message})
-
 def fb_log_in():
     user_token = get_token('Tokens/fb_token.txt')
     graph = facebook.GraphAPI(access_token = user_token, version = '2.6')

@@ -1,4 +1,3 @@
-import dl_csv
 import likes
 import followers
 import posts
@@ -12,7 +11,6 @@ if __name__ == "__main__":
     start_date_day = today - datetime.timedelta(days = 3)
     end_date = today - datetime.timedelta(days=2)
 
-    dl_csv.get_csv()
     likes.start_fb_likes()
     followers.start_twitter_followers()
     tweets.start_scrape_tweets()

@@ -78,7 +78,7 @@ def set_up_csvs(start_date):
 def start_scrape_posts(start_date_day, end_date):
     graph = helper.fb_log_in()
 
-    utc=pytz.UTC
+    utc = pytz.UTC
     today = datetime.date.today()
 
     candreader, camp_writer, gov_writer, camp_path, gov_path = set_up_csvs(start_date_day)
@@ -95,16 +95,6 @@ def start_scrape_posts(start_date_day, end_date):
         get_posts(campaign_id, graph, cand_id, camp_writer, start_date, end_date,error_list, call_count)
         get_posts(gov_id, graph, cand_id, gov_writer, start_date, end_date,error_list, call_count)
         time.sleep(10)
-        break
-
-    message = "Good morning Mike,<br><br>"
-    if len(error_list) ==0:
-        message += "No errors today! Have a great day!"
-    else:
-        message+= "Here are today's errors:<br><br>"
-        for error in error_list:
-            message+= error+'<br><br>'
-    helper.send_message('mvasiliou94@gmail.com', 'Collected FB Statuses on ' + str(today), message, [("attachment", open(camp_path)),("attachment", open(gov_path))])
 
 if __name__ == "__main__":
     start_date_day = today - datetime.timedelta(days = 3)

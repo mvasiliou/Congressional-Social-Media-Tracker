@@ -41,18 +41,6 @@ def start_fb_likes():
         gov_likes = get_likes(gov_id, graph, error_list)
         row = [cand_id,date,campaign_likes,gov_likes]
         likeswriter.writerow(row)
-        break
-
-    error_message = "Good afternoon Mike,<br><br>"
-    if len(error_list) == 0:
-        error_message+="Congrats! There were no errors today!"
-    else:
-        error_message += "Here are today's errors: <br><br>"
-        for item in error_list:
-            error_message += item[0] + ',' + item[1] + ',' + item[2] + '<br>'
-    now = str(datetime.datetime.now())	
-    helper.send_message('mvasiliou94@gmail.com', 'Successfully scraped likes at: '+ now, error_message, [("attachment", open(file_name))])
-    print('Done')
     
 if __name__ =="__main__":
     start_fb_likes()
