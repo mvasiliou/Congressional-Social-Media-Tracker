@@ -5,20 +5,7 @@ import datetime
 import dateutil.parser
 import pytz
 import time
-
-def send_simple_message(receiver, subject, message, file_name,file_name_2, mailgun_key):
-    return requests.post(
-        "https://api.mailgun.net/v3/mikevasiliou.com/messages",
-        auth=("api", mailgun_key),
-        files=[("attachment", open(file_name)), ("attachment",open(file_name_2))],
-        data={"from": "War Room Bot <warroom@mikevasiliou.com>",
-              "to": [receiver],
-              "subject": subject,
-              "html": message})
-
-def login(user_token):
-    graph = facebook.GraphAPI(access_token = user_token, version = '2.6')
-    return graph
+import helper
 
 def count_interactions(graph, post_id,type_int, post, call_count):
     call_count += 1
@@ -88,8 +75,8 @@ def set_up_csvs(start_date):
     next(candreader)
     return candreader, camp_writer, gov_writer, camp_path, gov_path
 
-def start_scrape_posts(start_date_day, end_date, fb_token, mailgun_key):
-    graph = login(fb_token)
+def start_scrape_posts(start_date_day, end_date):
+    graph = helper.fb_log_in()
 
     utc=pytz.UTC
     today = datetime.date.today()
@@ -108,6 +95,7 @@ def start_scrape_posts(start_date_day, end_date, fb_token, mailgun_key):
         get_posts(campaign_id, graph, cand_id, camp_writer, start_date, end_date,error_list, call_count)
         get_posts(gov_id, graph, cand_id, gov_writer, start_date, end_date,error_list, call_count)
         time.sleep(10)
+        break
 
     message = "Good morning Mike,<br><br>"
     if len(error_list) ==0:
@@ -116,10 +104,10 @@ def start_scrape_posts(start_date_day, end_date, fb_token, mailgun_key):
         message+= "Here are today's errors:<br><br>"
         for error in error_list:
             message+= error+'<br><br>'
-    send_simple_message('mvasiliou94@gmail.com', 'Collected FB Statuses on ' + str(today), message, camp_path,gov_path, mailgun_key)
+    helper.send_message('mvasiliou94@gmail.com', 'Collected FB Statuses on ' + str(today), message, [("attachment", open(camp_path)),("attachment", open(gov_path))])
 
 if __name__ == "__main__":
     start_date_day = today - datetime.timedelta(days = 3)
     end_date = today - datetime.timedelta(days=2)
 
-    start_scrape_posts(start_date_day, end_date, fb_token, mailgun_key)
+    start_scrape_posts(start_date_day, end_date)

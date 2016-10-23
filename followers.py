@@ -4,22 +4,7 @@ from pprint import pprint
 import datetime
 import time
 import requests
-
-def send_simple_message(receiver, subject, message, file_name, mailgun_key):
-    return requests.post(
-        "https://api.mailgun.net/v3/mikevasiliou.com/messages",
-        auth=("api", mailgun_key),
-        files=[("attachment", open(file_name))],
-        data={"from": "War Room Bot <warroom@mikevasiliou.com>",
-              "to": [receiver],
-              "subject": subject,
-              "html": message})
-
-def get_twitter_api(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET):  
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-    api = tweepy.API(auth, wait_on_rate_limit=True)
-    return api    
+import helper
 
 def get_follow_counts(api,acc_id, cand_id, error_list):
     if acc_id == '?':
@@ -39,7 +24,7 @@ def get_follow_counts(api,acc_id, cand_id, error_list):
         error_list.append([cand_id, e, e.args])
         return 'ERROR','ERROR','ERROR','ERROR'
 
-def start_twitter_followers(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET):
+def start_twitter_followers():
     cand_file = open('candidate_links.csv','r')
     cand_reader = csv.reader(cand_file)
     next(cand_reader)
@@ -52,7 +37,7 @@ def start_twitter_followers(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_K
     header = ['cand_id','date','camp_followers','camp_following','camp_statuses','camp_favorites','gov_followers','gov_following','gov_statuses', 'gov_favorites']
     follow_writer.writerow(header)
 
-    api = get_twitter_api(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    api = helper.twitter_log_in()
 
     error_list = []
     print("Variables set up for scraping Twitter followers...scraping now!")
@@ -64,6 +49,7 @@ def start_twitter_followers(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_K
         gov_following, gov_followers, gov_statuses,gov_favorites = get_follow_counts(api,gov_twitter, cand_id, error_list)
         write_row = [cand_id, date, camp_followers, camp_following, camp_statuses,camp_favorites, gov_followers, gov_following,gov_statuses, gov_favorites]
         follow_writer.writerow(write_row)
+        break
 
     error_message = "Good morning Mike,<br><br>"
     if len(error_list) == 0:
@@ -73,8 +59,8 @@ def start_twitter_followers(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_K
         for item in error_list:
             error_message += str(item[0]) + ',' + str(item[1]) + ',' + str(item[2]) + '<br>'
     now = datetime.datetime.now()    
-    send_simple_message('mvasiliou94@gmail.com', 'Successfully scraped followers at: '+str(date), error_message, file_name, mailgun_key)
+    helper.send_message('mvasiliou94@gmail.com', 'Successfully scraped followers at: '+str(date), error_message, [("attachment", open(file_name))])
     print('Done')
 
 if __name__ == "__main__":
-    start_twitter_followers(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    start_twitter_followers()

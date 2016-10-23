@@ -1,17 +1,7 @@
 import facebook
 import csv
 import datetime
-import requests
-
-def send_simple_message(receiver, subject, message, file_name, mailgun_key):
-    return requests.post(
-        "https://api.mailgun.net/v3/mikevasiliou.com/messages",
-        auth=("api", mailgun_key),
-        files=[("attachment", open(file_name))],
-        data={"from": "War Room Bot <warroom@mikevasiliou.com>",
-              "to": [receiver],
-              "subject": subject,
-              "html": message})
+import helper
 
 def get_likes(page_id, graph, error_list):
     if page_id == '?' or page_id == '':
@@ -30,12 +20,8 @@ def get_likes(page_id, graph, error_list):
             error_list.append([page_id, str(error), str(error.args)])
     return likes 
 
-def log_in(user_token):
-    graph = facebook.GraphAPI(access_token = user_token, version = '2.6')
-    return graph
-
-def start_fb_likes(fb_token, mailgun_key):
-    graph = log_in(fb_token)
+def start_fb_likes():
+    graph = helper.fb_log_in()
     candfile = open('candidate_links.csv')
     candreader = csv.reader(candfile)
     date = str(datetime.date.today())
@@ -55,6 +41,7 @@ def start_fb_likes(fb_token, mailgun_key):
         gov_likes = get_likes(gov_id, graph, error_list)
         row = [cand_id,date,campaign_likes,gov_likes]
         likeswriter.writerow(row)
+        break
 
     error_message = "Good afternoon Mike,<br><br>"
     if len(error_list) == 0:
@@ -64,8 +51,8 @@ def start_fb_likes(fb_token, mailgun_key):
         for item in error_list:
             error_message += item[0] + ',' + item[1] + ',' + item[2] + '<br>'
     now = str(datetime.datetime.now())	
-    send_simple_message('mvasiliou94@gmail.com', 'Successfully scraped likes at: '+ now, error_message, file_name, mailgun_key)
+    helper.send_message('mvasiliou94@gmail.com', 'Successfully scraped likes at: '+ now, error_message, [("attachment", open(file_name))])
     print('Done')
     
 if __name__ =="__main__":
-    start_fb_likes(fb_token)
+    start_fb_likes()

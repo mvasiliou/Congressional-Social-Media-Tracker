@@ -5,22 +5,7 @@ import time
 from email.utils import parsedate_tz
 import pytz
 import requests
-
-def send_simple_message(receiver, subject, message, file_name, file_name_2, mailgun_key):
-    return requests.post(
-        "https://api.mailgun.net/v3/mikevasiliou.com/messages",
-        auth=("api", mailgun_key),
-        files=[("attachment", open(file_name)),("attachment", open(file_name_2))],
-        data={"from": "War Room Bot <warroom@mikevasiliou.com>",
-              "to": [receiver],
-              "subject": subject,
-              "html": message})
-
-def get_twitter_api(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET):    
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-    api = tweepy.API(auth, wait_on_rate_limit=True)
-    return api    
+import helper
 
 def to_datetime(datestring):
     time_tuple = parsedate_tz(datestring.strip())
@@ -69,7 +54,7 @@ def get_tweets(api, acc_id, cand_id, writer, start_date, end_date, error_list):
 
     return tweet_list
 
-def start_scrape_tweets(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET):
+def start_scrape_tweets():
     cand_file = open('candidate_links.csv','r')
     cand_reader = csv.reader(cand_file)
     next(cand_reader)
@@ -93,7 +78,7 @@ def start_scrape_tweets(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, 
     gov_tweets_writer.writerow(header)
 
     error_list = []
-    api = get_twitter_api(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    api = helper.twitter_log_in()
     print('Set up variables...scraping tweets now!')
 
     for i, row in enumerate(cand_reader):
@@ -104,13 +89,14 @@ def start_scrape_tweets(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, 
         camp_tweets = get_tweets(api, camp_twitter, cand_id, camp_tweets_writer,start_date, end_date,error_list)
         gov_tweets = get_tweets(api, gov_twitter, cand_id, gov_tweets_writer,start_date,end_date, error_list)
         break
+
     message = 'Hello Mike, <br><br>'
     if len(error_list) == 0:
         message += "No errors! Have a great day!"
     else:
         for error in error_list:
             message += error + '<br><br>'
-    send_simple_message('mvasiliou94@gmail.com', 'Completed scraping tweets for ' + str(today),message, camp_file_name, gov_file_name, mailgun_key)
+    helper.send_message('mvasiliou94@gmail.com', 'Completed scraping tweets for ' + str(today),message, [("attachment", open(camp_file_name)),("attachment", open(gov_file_name))])
 
 if __name__ == '__main__':
-    start_scrape_tweets(mailgun_key, CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    start_scrape_tweets()
